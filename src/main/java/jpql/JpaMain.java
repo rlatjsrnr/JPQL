@@ -27,20 +27,20 @@ public class JpaMain {
             Member member = new Member();
             member.setUsername("회원1");
             member.setTeam(teamA);
+            member.setAge(10);
             em.persist(member);
 
             Member member1 = new Member();
             member1.setUsername("회원2");
             member1.setTeam(teamA);
+            member1.setAge(10);
             em.persist(member1);
 
             Member member2 = new Member();
             member2.setUsername("회원3");
             member2.setTeam(teamB);
+            member2.setAge(10);
             em.persist(member2);
-
-            em.flush();
-            em.clear();
 
             /*
             // 명시적 join
@@ -122,17 +122,29 @@ public class JpaMain {
             for (Member m : resultList) {
                 System.out.println("m = " + m.getUsername() + ", " + m.getTeam().getName());
             }
-            */
+           /
 
-            String query = "select t from Team t join fetch t.members";
-            List<Team> resultList = em.createQuery(query, Team.class).getResultList();
+            String query = "select m from Member m where m.team = :team";
+            List<Member> resultList = em.createQuery(query, Member.class)
+                    .setParameter("team", teamA)
+                    .getResultList();
 
-            for (Team t : resultList) {
-                System.out.println("t = " + t.getName() + "| members = " + t.getMembers().size());
-                for(Member m : t.getMembers()){
-                    System.out.println("-> m = " + m);
-                }
+            for (Member member3 : resultList) {
+                System.out.println("member3 = " + member3);
             }
+             */
+
+            // 벌크 연산을 할 경우 영속성 컨텍스트 내의 데이터를 다시 쓰면 안된다.
+            // 벌크 연산은 영속성 컨텍스트를 이용하지 않고 디비에 바로 접근하기 때문이다.
+            // 그렇게 때문에 벌크 연산 이후에 다시 em.find()를 해야함
+            int i = em.createQuery("update Member m set m.age = 20 where m.age = 10").executeUpdate();
+            System.out.println(i);
+            em.clear();
+
+            Member member3 = em.find(Member.class, member1.getId());
+
+            System.out.println(member3.getAge());
+
 
             tx.commit();
         } catch (Exception e) {

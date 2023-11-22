@@ -2,6 +2,7 @@ package jpql;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,6 +18,7 @@ public class Team {
     @Id @GeneratedValue
     private Long id;
     private String name;
+
 
     @OneToMany(mappedBy = "team")
     private List<Member> members = new ArrayList<>();
